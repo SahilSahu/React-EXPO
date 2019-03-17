@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Constants, ImagePicker, Permissions } from 'expo';
+import { Constants, ImagePicker, Location, Permissions } from 'expo';
 import uuid from 'uuid';
 import * as firebase from 'firebase';
 
@@ -35,18 +35,42 @@ export default class App extends React.Component {
   state = {
     image: null,
     uploading: false,
+    location: null,
+    errorMessage: null,
   };
   
   async componentDidMount() {
     await Permissions.askAsync(Permissions.CAMERA_ROLL);
     await Permissions.askAsync(Permissions.CAMERA);
+    // await Permissions.askAsync(Permissions.LOCATION);
   }
+
+  // componentWillMount() {
+  //   if (Platform.OS === 'android' && !Constants.isDevice) {
+  //     this.setState({
+  //       errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
+  //     });
+  //   } else {
+  //     this._getLocationAsync();
+  //   }
+  // }
+
+  
 
   render() {
     let { image } = this.state;
+    let text = 'Waiting..';
+    if (this.state.errorMessage) {
+      text = this.state.errorMessage;
+    } else if (this.state.location) {
+      text = JSON.stringify(this.state.location);
+    }
+
 
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        // <Button onPress={this._getLocationAsync} title="Location" />
+        // <Text>{text}</Text>
         {image ? null : (
           <Text
             style={{
@@ -58,13 +82,13 @@ export default class App extends React.Component {
             Example: Upload ImagePicker result
           </Text>
         )}
-
+        <Text>{text}</Text>
         <Button
           onPress={this._pickImage}
           title="Pick an image from camera roll"
         />
 
-        <Button onPress={this._takePhoto} title="Take a photo" />
+        <Button onPress={this._function1combined} title="Take a photo" />
 
         {this._maybeRenderImage()}
         {this._maybeRenderUploadingOverlay()}
@@ -73,6 +97,23 @@ export default class App extends React.Component {
       </View>
     );
   }
+
+  _function1combined = async () => {
+    this._getLocationAsync;
+    thid._takePhoto;
+  };
+
+  _getLocationAsync = async () => {
+    let { status } =await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== 'granted') {
+      this.setState({
+        errorMessage: 'Permission to access location was denied',
+      });
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    this.setState({ location });
+  };
 
   _maybeRenderUploadingOverlay = () => {
     if (this.state.uploading) {
